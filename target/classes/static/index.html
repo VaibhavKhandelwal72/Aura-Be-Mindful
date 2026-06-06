@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura - Student Mental Wellness Tracker</title>
+    <meta name="description" content="A comprehensive tool to support student well-being during competitive exams. Track mood, manage stress, practice box breathing, write journals, and chat with Aura.">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for trends and analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+    <!-- Accessibility Skip to Content Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Screen Reader Live Status Announcer -->
+    <div id="live-announcer" class="sr-only" aria-live="polite"></div>
+
+    <!-- Background decorative gradients -->
+    <div class="bg-gradient bg-grad-1" aria-hidden="true"></div>
+    <div class="bg-gradient bg-grad-2" aria-hidden="true"></div>
+
+    <div class="app-container">
+        <!-- Main Navigation Header (Visible only when logged in) -->
+        <header id="app-header" class="main-header hidden">
+            <div class="header-brand">
+                <span class="brand-logo" aria-hidden="true">🍃</span>
+                <span class="brand-name">Aura</span>
+            </div>
+            <nav aria-label="Main Navigation">
+                <ul class="nav-links">
+                    <li><button class="nav-btn active" data-view="dashboard" aria-current="page">Dashboard</button></li>
+                    <li><button class="nav-btn" data-view="mood-logger">Check-in</button></li>
+                    <li><button class="nav-btn" data-view="triggers">Triggers</button></li>
+                    <li><button class="nav-btn" data-view="companion">Aura AI</button></li>
+                    <li><button class="nav-btn" data-view="mindfulness">Mindfulness</button></li>
+                    <li><button class="nav-btn" data-view="exam-mode">Mock Test Mode</button></li>
+                    <li><button class="nav-btn" data-view="journal">Diary</button></li>
+                </ul>
+            </nav>
+            <div class="user-profile">
+                <button id="emergency-btn" class="btn btn-secondary btn-sm" aria-label="Activate Emergency Calm" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); margin-right: 8px;">🚨 Panic Button</button>
+                <span id="user-display" class="user-name">Student</span>
+                <span id="exam-badge" class="badge">JEE</span>
+                <button id="logout-btn" class="btn btn-secondary btn-sm" aria-label="Log Out">Log Out</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="main-content" tabindex="-1">
+
+            <!-- 1. AUTH VIEW (Login & Register) -->
+            <section id="view-auth" class="view-section auth-card">
+                <div class="auth-header">
+                    <h1>Welcome to Aura</h1>
+                    <p class="subtitle">Your sanctuary during competitive exam preparation</p>
+                </div>
+
+                <div class="auth-tabs" role="tablist">
+                    <button id="tab-login" class="auth-tab-btn active" role="tab" aria-selected="true" aria-controls="form-login-container">Log In</button>
+                    <button id="tab-register" class="auth-tab-btn" role="tab" aria-selected="false" aria-controls="form-register-container">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="form-login-container" class="auth-form-container" role="tabpanel" aria-labelledby="tab-login">
+                    <form id="login-form" novalidate>
+                        <div class="form-group">
+                            <label for="login-username">Username</label>
+                            <input type="text" id="login-username" name="username" required autocomplete="username" placeholder="Enter your username">
+                            <span class="field-error" id="error-login-username" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="••••••••">
+                            <span class="field-error" id="error-login-password" aria-live="polite"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="form-register-container" class="auth-form-container hidden" role="tabpanel" aria-labelledby="tab-register">
+                    <form id="register-form" novalidate>
+                        <div class="form-group">
+                            <label for="reg-username">Username</label>
+                            <input type="text" id="reg-username" name="username" required autocomplete="username" placeholder="Minimum 3 characters">
+                            <span class="field-error" id="error-reg-username" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password">Password</label>
+                            <input type="password" id="reg-password" name="password" required autocomplete="new-password" placeholder="Minimum 6 characters">
+                            <span class="field-error" id="error-reg-password" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-exam">Target Examination</label>
+                            <select id="reg-exam" name="examType" required>
+                                <option value="" disabled selected>Select your target exam</option>
+                                <option value="JEE">JEE (Engineering)</option>
+                                <option value="NEET">NEET (Medical)</option>
+                                <option value="UPSC">UPSC Civil Services</option>
+                                <option value="CAT">CAT (Management)</option>
+                                <option value="GATE">GATE (Postgrad)</option>
+                                <option value="BOARDS">Class 10/12 Board Exams</option>
+                                <option value="OTHER">Other Examinations</option>
+                            </select>
+                            <span class="field-error" id="error-reg-exam" aria-live="polite"></span>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                    </form>
+                </div>
+                <div id="auth-general-error" class="general-error-box hidden" aria-live="assertive"></div>
+            </section>
+
+
+            <!-- 2. DASHBOARD VIEW -->
+            <section id="view-dashboard" class="view-section hidden">
+                <div class="view-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h1 tabindex="-1" id="heading-dashboard">Wellness Dashboard</h1>
+                        <p class="subtitle">A holistic view of your mental bandwidth and trends</p>
+                    </div>
+                    <button id="show-report-btn" class="btn btn-secondary btn-sm" style="border-color: var(--accent-teal); color: var(--accent-teal);">📄 Generate Wellness Report</button>
+                </div>
+
+                <!-- Exam Countdown and Check-in Streak Banner -->
+                <div id="countdown-banner" class="countdown-banner glass-card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px 24px; border-left: 5px solid var(--accent-blue);">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;">⏱️</span>
+                        <div>
+                            <span style="font-weight: 700; color: var(--text-primary);" id="countdown-title">Target Exam Countdown</span>
+                            <p id="countdown-days" style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">Calculating countdown days...</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.5rem;">🔥</span>
+                        <div>
+                            <span style="font-weight: 700; color: var(--text-primary);">Check-in Streak</span>
+                            <p style="font-size: 0.9rem; color: var(--accent-teal); margin: 0; font-weight: 600;"><span id="dash-streak">0</span> Days Active</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Smart Break Alert Widget -->
+                <div id="smart-break-widget" class="glass-card hidden" style="border-left: 5px solid var(--accent-teal); padding: 15px 24px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(20, 184, 166, 0.08);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">💡</span>
+                        <div>
+                            <span id="break-alert-title" style="font-weight: 700; color: var(--text-primary);">Smart Break Recommendation</span>
+                            <p id="break-alert-desc" style="font-size: 0.9rem; color: var(--text-secondary); margin: 5px 0 0 0;">You've studied 4+ hours. We recommend a 20-20-20 eye relaxation break.</p>
+                        </div>
+                    </div>
+                    <button id="break-action-btn" class="btn btn-secondary btn-sm" style="border-color: var(--accent-teal); color: var(--accent-teal);">Take Break</button>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Stat Card: Avg Mood -->
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon mood-icon">🎭</div>
+                        <div class="stat-info">
+                            <h3>Average Mood</h3>
+                            <p class="stat-value" id="dash-avg-mood">N/A</p>
+                            <p class="stat-desc">Scale of 1-5</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Avg Stress -->
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon stress-icon">⚡</div>
+                        <div class="stat-info">
+                            <h3>Average Stress</h3>
+                            <p class="stat-value" id="dash-avg-stress">N/A</p>
+                            <p class="stat-desc">Scale of 1-10</p>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Burnout Radar -->
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon radar-icon" style="color: var(--danger);">🛡️</div>
+                        <div class="stat-info">
+                            <h3>AI Burnout Risk</h3>
+                            <p class="stat-value" id="dash-burnout-risk">0%</p>
+                            <p class="stat-desc" id="dash-burnout-desc">Low Exhaustion Risk</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <!-- Chart Section -->
+                    <div class="chart-container glass-card">
+                        <h2>Mood & Stress Trend</h2>
+                        <div class="canvas-wrapper">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Action Card: Smart Insights -->
+                    <div class="insights-container glass-card">
+                        <h2>Personalized Insights</h2>
+                        <div id="insights-list" class="insights-list">
+                            <!-- Injected dynamically -->
+                        </div>
+                        <h2 class="sub-section-title">Recommended Actions</h2>
+                        <div id="recommendations-list" class="insights-list">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 3. MOOD LOGGER VIEW -->
+            <section id="view-mood-logger" class="view-section hidden">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-mood-logger">Daily Wellness Check-in</h1>
+                    <p class="subtitle">Reflect honestly on your emotions. Your privacy is fully secured.</p>
+                </div>
+
+                <form id="mood-logger-form" class="form-grid glass-card" novalidate>
+                    <!-- Mood Level Picker -->
+                    <div class="form-section">
+                        <span class="section-label">How are you feeling overall?</span>
+                        <div class="mood-picker" role="radiogroup" aria-label="Overall Mood Selection">
+                            <label class="mood-option">
+                                <input type="radio" name="moodLevel" value="1" required>
+                                <span class="mood-emoji">😢</span>
+                                <span class="mood-text">Burnt Out</span>
+                            </label>
+                            <label class="mood-option">
+                                <input type="radio" name="moodLevel" value="2">
+                                <span class="mood-emoji">😞</span>
+                                <span class="mood-text">Stressed</span>
+                            </label>
+                            <label class="mood-option">
+                                <input type="radio" name="moodLevel" value="3">
+                                <span class="mood-emoji">😐</span>
+                                <span class="mood-text">Neutral</span>
+                            </label>
+                            <label class="mood-option">
+                                <input type="radio" name="moodLevel" value="4">
+                                <span class="mood-emoji">🙂</span>
+                                <span class="mood-text">Calm</span>
+                            </label>
+                            <label class="mood-option">
+                                <input type="radio" name="moodLevel" value="5">
+                                <span class="mood-emoji">🤩</span>
+                                <span class="mood-text">Hopeful</span>
+                            </label>
+                        </div>
+                        <span class="field-error" id="error-mood-picker" aria-live="polite"></span>
+                    </div>
+
+                    <!-- Stress Scale -->
+                    <div class="form-section">
+                        <label for="stress-range" class="section-label">Stress Intensity Level (1 - 10)</label>
+                        <div class="slider-container">
+                            <span class="slider-label">Calm (1)</span>
+                            <input type="range" id="stress-range" name="stressLevel" min="1" max="10" value="5" class="slider">
+                            <span class="slider-label">High Anxiety (10)</span>
+                        </div>
+                        <div class="slider-value-display">Selected: <strong id="stress-value-badge">5</strong>/10</div>
+                    </div>
+
+                    <!-- Feelings Checklist -->
+                    <div class="form-section">
+                        <span class="section-label">Check any specific feelings today (Select all that apply)</span>
+                        <div class="feelings-grid">
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Anxious">
+                                <span class="custom-checkbox"></span> Anxious
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Tired">
+                                <span class="custom-checkbox"></span> Exhausted
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Focused">
+                                <span class="custom-checkbox"></span> Focused
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Self-Doubt">
+                                <span class="custom-checkbox"></span> Self-Doubt
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Excited">
+                                <span class="custom-checkbox"></span> Excited
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Restless">
+                                <span class="custom-checkbox"></span> Restless
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Peer Pressure">
+                                <span class="custom-checkbox"></span> Peer Pressure
+                            </label>
+                            <label class="checkbox-container">
+                                <input type="checkbox" name="feelings" value="Sleepy">
+                                <span class="custom-checkbox"></span> Sleepy
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Sleep and Study Trackers -->
+                    <div class="form-section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <label for="mood-sleep" class="section-label">Sleep Duration (Last Night)</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="number" id="mood-sleep" name="sleepHours" min="0" max="24" step="0.5" placeholder="E.g., 7.5" required>
+                                <span style="font-size: 0.9rem; color: var(--text-secondary);">Hours</span>
+                            </div>
+                            <span class="field-error" id="error-mood-sleep" aria-live="polite"></span>
+                        </div>
+                        <div>
+                            <label for="mood-study" class="section-label">Study Duration (Today)</label>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <input type="number" id="mood-study" name="studyHours" min="0" max="24" step="0.5" placeholder="E.g., 8.0" required>
+                                <span style="font-size: 0.9rem; color: var(--text-secondary);">Hours</span>
+                            </div>
+                            <span class="field-error" id="error-mood-study" aria-live="polite"></span>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-section">
+                        <label for="mood-notes" class="section-label">Private Reflection / Notes (Optional)</label>
+                        <textarea id="mood-notes" name="note" rows="3" placeholder="What is making you feel this way? (e.g. mock test result, backlog load)"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit Daily Log</button>
+                    <div id="mood-logger-status" class="status-msg hidden" aria-live="polite"></div>
+                </form>
+            </section>
+
+
+            <!-- 4. STRESS TRIGGERS VIEW -->
+            <section id="view-triggers" class="view-section hidden">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-triggers">Identify Stress Triggers</h1>
+                    <p class="subtitle">Pinpointing root causes helps manage academic anxiety systematically</p>
+                </div>
+
+                <div class="trigger-layout">
+                    <!-- Form side -->
+                    <form id="trigger-form" class="glass-card trigger-form" novalidate>
+                        <h2>Log a Stress Trigger</h2>
+                        
+                        <div class="form-group">
+                            <label for="trigger-type">What triggered your stress today?</label>
+                            <select id="trigger-type" name="triggerType" required>
+                                <option value="" disabled selected>Select stress source</option>
+                                <option value="Mock Tests">Mock Tests / Performance Marks</option>
+                                <option value="Backlog">Backlog / Preparation Schedule</option>
+                                <option value="Peer Pressure">Peer Pressure / Comparisons</option>
+                                <option value="Parental Expectations">Parental / Family Expectations</option>
+                                <option value="Sleep Issues">Lack of Sleep / Exhaustion</option>
+                                <option value="Uncertainty">General Exam Day Uncertainty</option>
+                            </select>
+                            <span class="field-error" id="error-trigger-type" aria-live="polite"></span>
+                        </div>
+
+                        <!-- Conditional Mock Test / Exam fields -->
+                        <div id="mock-test-fields" class="hidden">
+                            <div class="form-group">
+                                <label for="trigger-subject">Subject/Topic (Optional)</label>
+                                <input type="text" id="trigger-subject" name="subjectTopic" placeholder="E.g., Physics - Mechanics">
+                            </div>
+                            <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label for="trigger-score">My Score (Optional)</label>
+                                    <input type="number" id="trigger-score" name="testScore" min="0" placeholder="E.g., 180">
+                                </div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label for="trigger-max-score">Max Score (Optional)</label>
+                                    <input type="number" id="trigger-max-score" name="maxScore" min="0" placeholder="E.g., 300">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="trigger-note">Context details (Optional)</label>
+                            <textarea id="trigger-note" name="note" rows="4" placeholder="E.g., Scored 10% lower in chemistry mock test today, feeling behind."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Log Trigger</button>
+                        <div id="trigger-status" class="status-msg hidden" aria-live="polite"></div>
+                    </form>
+
+                    <!-- History list side -->
+                    <div class="glass-card trigger-list-container">
+                        <h2>Your Logged Triggers</h2>
+                        <ul id="triggers-list-elements" class="timeline-list">
+                            <!-- Injected dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 5. COMPANION (AURA CHAT) VIEW -->
+            <section id="view-companion" class="view-section hidden">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-companion">Chat with Aura</h1>
+                    <p class="subtitle">Your empathetic study partner, designed to validate feelings and suggest focus routines.</p>
+                </div>
+
+                <div class="chat-wrapper glass-card">
+                    <!-- Message Feed -->
+                    <div id="chat-messages" class="chat-messages" role="log" aria-label="Conversation History" aria-live="polite">
+                        <div class="message aura-msg">
+                            <div class="msg-avatar">🍃</div>
+                            <div class="msg-bubble">
+                                <p>Hi there! I'm Aura. I know competitive prep can feel overwhelming at times. I am here to listen, share focus tips, or run breathing sessions with you. How are you feeling right now?</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing indicator -->
+                    <div id="chat-typing" class="chat-typing hidden" aria-hidden="true">
+                        <span></span><span></span><span></span>
+                    </div>
+
+                    <!-- Message input bar -->
+                    <form id="chat-form" class="chat-input-bar">
+                        <label for="chat-input" class="sr-only">Type your message</label>
+                        <input type="text" id="chat-input" required autocomplete="off" placeholder="Share your thoughts (e.g. 'I am feeling anxious about my backlog')">
+                        <button type="submit" class="btn btn-primary" aria-label="Send Message">Send</button>
+                    </form>
+                </div>
+            </section>
+
+
+            <!-- 6. MINDFULNESS & TIMERS VIEW -->
+            <section id="view-mindfulness" class="view-section hidden">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-mindfulness">Mindfulness & De-stressing Tools</h1>
+                    <p class="subtitle">Reset your physiology and focus using evidence-based relaxation guides</p>
+                </div>
+
+                <div class="mindfulness-row">
+                    <!-- Box Breathing Guide -->
+                    <div class="glass-card breathing-container">
+                        <h2>Box Breathing Trainer</h2>
+                        <p class="desc">Follow the bubble to regulate your autonomic nervous system (Inhale, Hold, Exhale, Hold).</p>
+                        
+                        <div class="breathing-circle-wrapper">
+                            <div id="breathing-circle" class="breathing-circle"></div>
+                            <div id="breathing-instruction" class="breathing-instruction">Press Start</div>
+                        </div>
+
+                        <div class="timer-display" id="breathing-timer-count">00:00</div>
+
+                        <div class="timer-controls">
+                            <button id="breathing-start-btn" class="btn btn-primary">Start Guide</button>
+                            <button id="breathing-stop-btn" class="btn btn-secondary hidden">Stop</button>
+                        </div>
+                    </div>
+
+                    <!-- Pomodoro Study Timer -->
+                    <div class="glass-card pomodoro-container">
+                        <h2>Pomodoro Focus & Break Timer</h2>
+                        <p class="desc">Train with 25-minute focus intervals and 5-minute stress-release breaks.</p>
+                        
+                        <div class="pomodoro-circle-wrapper">
+                            <div class="pomodoro-time" id="pomodoro-timer-display">25:00</div>
+                            <div class="pomodoro-phase" id="pomodoro-phase-label">Focus Interval</div>
+                        </div>
+
+                        <div class="timer-controls">
+                            <button id="pomodoro-start-btn" class="btn btn-primary">Start Timer</button>
+                            <button id="pomodoro-pause-btn" class="btn btn-secondary hidden">Pause</button>
+                            <button id="pomodoro-reset-btn" class="btn btn-secondary">Reset</button>
+                        </div>
+                        
+                        <div id="pomodoro-alert-box" class="pomodoro-alert-box hidden" aria-live="assertive">
+                            🎉 Take a break! Try a 2-minute breathing exercise before returning to studies.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- 7. JOURNAL DIARY VIEW -->
+            <section id="view-journal" class="view-section hidden">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-journal">Private Reflection Diary</h1>
+                    <p class="subtitle">A secure space to write your thoughts down. The app tracks the emotional tone of your logs.</p>
+                </div>
+
+                <div class="journal-layout">
+                    <!-- Write Entry -->
+                    <form id="journal-form" class="glass-card journal-form" novalidate>
+                        <h2>New Journal Entry</h2>
+                        <div id="gratitude-prompt-text" style="background: rgba(16, 185, 129, 0.08); border-left: 4px solid var(--accent-teal); padding: 10px 14px; border-radius: 4px; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 15px; font-weight: 500;">
+                            💡 Gratitude Prompt: Write down one thing you are grateful for today.
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="journal-title">Entry Title</label>
+                            <input type="text" id="journal-title" name="title" required placeholder="E.g., Mock Test Reflection">
+                            <span class="field-error" id="error-journal-title" aria-live="polite"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="journal-content">What's on your mind?</label>
+                            <textarea id="journal-content" name="content" rows="6" required placeholder="Write freely about your doubts, wins, or daily tasks..."></textarea>
+                            <span class="field-error" id="error-journal-content" aria-live="polite"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save Private Entry</button>
+                        <div id="journal-status" class="status-msg hidden" aria-live="polite"></div>
+                    </form>
+
+                    <!-- History Entries -->
+                    <div class="glass-card journal-list-container">
+                        <h2>Your Past Reflections</h2>
+                        <div id="journal-entries-elements" class="journal-entries-list">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. EMERGENCY CALM GROUNDING VIEW -->
+            <section id="view-emergency" class="view-section hidden" style="max-width: 600px; margin: 40px auto; text-align: center;">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-emergency" style="color: #f87171;">Grounding Sanctuary</h1>
+                    <p class="subtitle">An immediate relief space to manage panic, anxiety, or mock test distress.</p>
+                </div>
+
+                <div class="glass-card" style="padding: 40px 24px; border-color: rgba(239, 68, 68, 0.2);">
+                    <!-- Pulse Grounding Bubble -->
+                    <div class="breathing-circle-wrapper" style="width: 160px; height: 160px; margin: 0 auto 30px auto; border-color: rgba(239, 68, 68, 0.2);">
+                        <div id="grounding-bubble" class="breathing-circle" style="background: radial-gradient(circle, #ef4444 0%, rgba(239, 68, 68, 0.4) 100%); box-shadow: 0 0 30px rgba(239, 68, 68, 0.3); width: 100px; height: 100px; animation: groundingPulse 3s infinite ease-in-out;"></div>
+                    </div>
+
+                    <!-- Grounding Stage display -->
+                    <div id="grounding-display" style="min-height: 120px; margin-bottom: 30px;">
+                        <h2 id="grounding-stage-title" style="font-family: var(--font-heading); color: #f87171; margin-bottom: 12px;">5. See</h2>
+                        <p id="grounding-stage-desc" style="font-size: 1.1rem; line-height: 1.5; color: var(--text-primary);">Look around you and name <strong>5 things</strong> you can see right now (e.g. a book, your pen, a desk light).</p>
+                    </div>
+
+                    <!-- Step Controls -->
+                    <div class="timer-controls" style="justify-content: center; margin-bottom: 30px;">
+                        <button id="ground-prev-btn" class="btn btn-secondary btn-sm" disabled>Previous Step</button>
+                        <button id="ground-next-btn" class="btn btn-primary btn-sm" style="background: #ef4444; color: white;">Next Step</button>
+                    </div>
+
+                    <!-- Ambient Sound controls (Web Audio synthetics) -->
+                    <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 20px;">
+                        <span class="section-label" style="margin-bottom: 12px; font-size: 0.9rem;">Ambient Sound Synthesizer</span>
+                        <div style="display: flex; justify-content: center; gap: 10px;">
+                            <button id="sound-white-btn" class="btn btn-secondary btn-sm">🔊 Calming White Noise</button>
+                            <button id="sound-waves-btn" class="btn btn-secondary btn-sm">🔊 Ocean Tide Simulation</button>
+                            <button id="sound-stop-btn" class="btn btn-secondary btn-sm hidden" style="border-color: #ef4444; color: #f87171;">Stop Sound</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button id="exit-emergency-btn" class="btn btn-secondary btn-block">Exit Grounding Sanctuary</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. MOCK TEST PREP & GROUNDING MODE -->
+            <section id="view-exam-mode" class="view-section hidden">
+                <div class="view-header">
+                    <h1 tabindex="-1" id="heading-exam-mode">Mock Test Mode (Pre-Exam Prep)</h1>
+                    <p class="subtitle">Ground yourself, calm your thoughts, and review your cheat sheets 15 minutes before an exam.</p>
+                </div>
+
+                <div class="mindfulness-row">
+                    <!-- Pre-Exam Box Breathing -->
+                    <div class="glass-card breathing-container">
+                        <h2>1. Calming Box Breath</h2>
+                        <p class="desc">A quick 2-minute cycle to slow your heart rate and ease mock test performance anxiety.</p>
+                        
+                        <div class="breathing-circle-wrapper">
+                            <div id="exam-breathing-circle" class="breathing-circle" style="background: radial-gradient(circle, var(--accent-teal) 0%, rgba(20, 184, 166, 0.4) 100%);"></div>
+                            <div id="exam-breathing-instruction" class="breathing-instruction">Get Ready</div>
+                        </div>
+
+                        <div class="timer-display" id="exam-breathing-timer-count">02:00</div>
+
+                        <div class="timer-controls">
+                            <button id="exam-breathing-start-btn" class="btn btn-primary">Start Exercise</button>
+                            <button id="exam-breathing-stop-btn" class="btn btn-secondary hidden">Stop</button>
+                        </div>
+                    </div>
+
+                    <!-- Affirmations & Revision Cheat Sheet -->
+                    <div class="glass-card" style="display: flex; flex-direction: column; gap: 20px;">
+                        <div>
+                            <h2>2. Positive Exam Affirmations</h2>
+                            <blockquote id="exam-affirmation-box" style="background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--accent-teal); padding: 12px 16px; border-radius: 4px; font-style: italic; margin: 10px 0; font-size: 1rem;">
+                                "I have prepared to the best of my ability. One test does not define my intelligence or future."
+                            </blockquote>
+                            <button id="next-affirmation-btn" class="btn btn-secondary btn-sm">🔄 Next Affirmation</button>
+                        </div>
+
+                        <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 15px;">
+                            <h2>3. Quick-Glance Cheat Sheet</h2>
+                            <p class="desc" style="margin-bottom: 10px;">Store critical physics formulas, chemistry equations, or board points. Auto-saves locally.</p>
+                            <textarea id="cheat-sheet-notes" rows="6" placeholder="Type or paste your formulas here... E.g., F = q(E + v x B), sin(A+B) = sinAcosB + cosAsinB" style="font-family: monospace;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Wellness Report Modal -->
+        <div id="report-modal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);">
+            <div class="glass-card report-modal-content" style="max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; padding: 30px; border-color: var(--card-border); position: relative;">
+                <button id="close-report-btn" class="btn btn-secondary btn-sm" style="position: absolute; top: 20px; right: 20px;">✕ Close</button>
+                
+                <div id="printable-report-area">
+                    <div style="text-align: center; border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 20px;">
+                        <span style="font-size: 2.5rem;">🍃</span>
+                        <h1 style="font-family: var(--font-heading); color: var(--text-primary); margin-top: 10px;">Aura - Student Wellness Report</h1>
+                        <p style="font-size: 0.9rem; color: var(--text-secondary);">Empowering JEE, NEET, and Board Exam aspirants with balanced mental metrics</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                        <div class="glass-card" style="padding: 15px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
+                            <h3 style="color: var(--accent-teal); margin-bottom: 10px;">📊 Activity & Habits</h3>
+                            <p><strong>Avg Sleep:</strong> <span id="report-avg-sleep">--</span> hours/day</p>
+                            <p><strong>Avg Study:</strong> <span id="report-avg-study">--</span> hours/day</p>
+                            <p><strong>Active Streak:</strong> <span id="report-streak">0</span> days</p>
+                        </div>
+                        <div class="glass-card" style="padding: 15px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
+                            <h3 style="color: #f87171; margin-bottom: 10px;">⚡ Emotional Health</h3>
+                            <p><strong>Avg Mood:</strong> <span id="report-avg-mood">--</span> / 5</p>
+                            <p><strong>Avg Stress:</strong> <span id="report-avg-stress">--</span> / 10</p>
+                            <p><strong>Burnout Risk:</strong> <span id="report-burnout">0%</span></p>
+                        </div>
+                    </div>
+
+                    <div class="glass-card" style="padding: 20px; margin-bottom: 25px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
+                        <h3 style="color: var(--accent-blue); margin-bottom: 12px;">🔍 Stress Triggers Frequency</h3>
+                        <ul id="report-triggers-list" style="padding-left: 20px; line-height: 1.6; color: var(--text-secondary);">
+                            <!-- Injected dynamically -->
+                        </ul>
+                    </div>
+
+                    <div class="glass-card" style="padding: 20px; background: rgba(16, 185, 129, 0.05); border-left: 4px solid var(--accent-teal); margin-bottom: 20px;">
+                        <h3 style="color: var(--accent-teal); margin-bottom: 8px;">💡 Personalized Coping Recommendation</h3>
+                        <p id="report-advice" style="font-size: 0.95rem; line-height: 1.5; color: var(--text-primary); margin: 0;"></p>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="print-report-btn" class="btn btn-primary">🖨️ Print / Save PDF</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>© 2026 Aura Student Wellness. A secure, accessible sanctuary for board & entrance exam prep.</p>
+        </footer>
+    </div>
+
+    <!-- Main Client JS -->
+    <script src="/js/app.js"></script>
+</body>
+</html>
